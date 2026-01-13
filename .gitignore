@@ -4,6 +4,8 @@
 /bin/
 /dist/
 /build/
+app
+out
 *.exe
 *.exe~
 *.dll
