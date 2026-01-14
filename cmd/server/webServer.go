@@ -21,7 +21,7 @@ func NewWebServer(client *mongo.Client) *server {
 	appPort := os.Getenv("PORT")
 	if appPort == "" {
 		log.Println("No API_ADDRESS found in .env, using default :8080")
-		appPort = "8081"
+		appPort = "8080"
 	}
 	return &server{
 		Address: ":" + appPort,
