@@ -30,9 +30,13 @@ func main() {
 		port = "8080"
 	}
 
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	mux := http.NewServeMux()
+
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("Railway OK"))
 	})
 
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+	log.Println("Listening on :" + port)
+	log.Fatal(http.ListenAndServe(":"+port, mux))
 }
