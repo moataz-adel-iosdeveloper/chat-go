@@ -7,6 +7,10 @@ import (
 )
 
 func main() {
+	// Load .env only in local development
+	// if os.Getenv("RAILWAY_ENVIRONMENT") == "" {
+	// 	_ = godotenv.Load()
+	// }
 	// err := godotenv.Load()
 	// if err != nil {
 	// 	log.Println("No .env file found")
