@@ -38,7 +38,7 @@ func main() {
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("Railway OK"))
+		w.Write([]byte("Railway OK test"))
 	})
 
 	log.Println("Listening on :" + port)
