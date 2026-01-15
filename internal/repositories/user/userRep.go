@@ -1,8 +1,8 @@
 package userRepository
 
 import (
+	"chat-go/internal/config"
 	"chat-go/internal/models"
-	"chat-go/internal/services"
 	"context"
 	"errors"
 	"log"
@@ -15,7 +15,7 @@ import (
 
 // helper to get the users collection at runtime. Returns an error if DB not initialized.
 func getUserCollection() (*mongo.Collection, error) {
-	col := services.GetUserCollection()
+	col := config.GetUserCollection()
 	if col == nil {
 		return nil, errors.New("database not initialized: call services.InitDB before using repositories")
 	}

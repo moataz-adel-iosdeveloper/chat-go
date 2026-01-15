@@ -1,9 +1,9 @@
 package ChatControllers
 
 import (
+	"chat-go/internal/config"
 	"chat-go/internal/models"
 	conversationsRepository "chat-go/internal/repositories/conversations"
-	"chat-go/internal/services"
 	"log"
 	"net/http"
 	"time"
@@ -77,7 +77,7 @@ func ChatHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 func connectionHandler(conversation *models.Conversation, userID string, w http.ResponseWriter, req *http.Request) {
-	connection, err := services.SocketServe(w, req)
+	connection, err := config.SocketServe(w, req)
 	if err != nil {
 		log.Println("WebSocket connection error:", err)
 		return

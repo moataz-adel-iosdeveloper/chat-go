@@ -57,5 +57,5 @@ func (webServer *server) Connect() error {
 	routes.NewRoutes().SocketRoutes(wsRouter)
 
 	log.Printf("starting server at %s", webServer.Address)
-	return http.ListenAndServe(webServer.Address, router)
+	return http.ListenAndServe(webServer.Address, middlewares.EnableCORS(router))
 }

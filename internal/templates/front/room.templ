@@ -1,0 +1,167 @@
+package front
+
+
+
+templ ChatRoom(data ChatPageData) {
+	<div class="min-h-screen bg-gray-100" id="chat-page" data-conversation-id={ data.ConversationID }>
+		<header class="bg-white shadow">
+			<div class="max-w-7xl mx-auto px-4 py-4 flex items-center">
+				<a href="/home" class="text-gray-600 hover:text-gray-800 mr-4">
+					<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+					</svg>
+				</a>
+				<div class="flex items-center">
+					<div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-white font-bold">
+						{ string(data.OtherUserName[0]) }
+					</div>
+					<h1 class="ml-3 text-xl font-bold text-gray-800">{ data.OtherUserName }</h1>
+				</div>
+			</div>
+		</header>
+		
+		<main class="max-w-7xl mx-auto px-4 py-6">
+			<div class="bg-white rounded-lg shadow-lg overflow-hidden" style="height: calc(100vh - 200px);">
+				<!-- Messages Container -->
+				<div id="messages" class="flex-1 overflow-y-auto p-4 space-y-4" style="height: calc(100% - 80px);">
+					<div hx-get={ "/chat/" + data.ConversationID + "/messages" } hx-trigger="load" hx-target="#messages" hx-swap="innerHTML">
+						<div class="flex justify-center">
+							<span class="text-gray-400 text-sm">Loading messages...</span>
+						</div>
+					</div>
+				</div>
+				
+				<!-- Message Input -->
+				<div class="border-t p-4 bg-gray-50">
+					<form id="message-form" class="flex gap-3">
+						<input 
+							type="text" 
+							id="message-input"
+							name="content"
+							placeholder="Type a message..."
+							class="flex-1 px-4 py-2 border border-gray-300 rounded-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+							autocomplete="off"
+						/>
+						<button 
+							type="submit"
+							class="bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition font-medium"
+						>
+							<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+							</svg>
+						</button>
+					</form>
+				</div>
+			</div>
+		</main>
+		
+		<script>
+			(function() {
+				const conversationID = document.getElementById('chat-page').dataset.conversationId;
+				const messagesContainer = document.getElementById('messages');
+				const messageForm = document.getElementById('message-form');
+				const messageInput = document.getElementById('message-input');
+				let ws = null;
+				
+				// Connect to WebSocket
+				function connectWebSocket() {
+					const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+					const wsUrl = protocol + '//' + window.location.host + '/ws/chat/' + conversationID;
+					
+					ws = new WebSocket(wsUrl);
+					
+					ws.onopen = function() {
+						console.log('WebSocket connected');
+					};
+					
+					ws.onmessage = function(event) {
+						const data = JSON.parse(event.data);
+						if (data.type === 'text' && data.payload) {
+							appendMessage(data.payload.message, data.payload.senderId, false);
+						}
+					};
+					
+					ws.onclose = function() {
+						console.log('WebSocket disconnected, reconnecting...');
+						setTimeout(connectWebSocket, 3000);
+					};
+					
+					ws.onerror = function(error) {
+						console.error('WebSocket error:', error);
+					};
+				}
+				
+				// Append message to chat
+				function appendMessage(content, senderId, isOwn) {
+					const messageDiv = document.createElement('div');
+					messageDiv.className = 'flex ' + (isOwn ? 'justify-end' : 'justify-start');
+					
+					const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+					
+					messageDiv.innerHTML = `
+						<div class="max-w-xs md:max-w-md lg:max-w-lg ${ isOwn ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800' } rounded-2xl px-4 py-2">
+							<p>${ escapeHtml(content) }</p>
+							<p class="text-xs ${ isOwn ? 'text-blue-200' : 'text-gray-500' } mt-1 text-right">${ time }</p>
+						</div>
+					`;
+					
+					messagesContainer.appendChild(messageDiv);
+					scrollToBottom();
+				}
+				
+				// Escape HTML to prevent XSS
+				function escapeHtml(text) {
+					const div = document.createElement('div');
+					div.textContent = text;
+					return div.innerHTML;
+				}
+				
+				// Scroll to bottom of messages
+				function scrollToBottom() {
+					messagesContainer.scrollTop = messagesContainer.scrollHeight;
+				}
+				
+				// Handle form submission
+				messageForm.addEventListener('submit', function(e) {
+					e.preventDefault();
+					const content = messageInput.value.trim();
+					if (!content || !ws || ws.readyState !== WebSocket.OPEN) return;
+					
+					const messageData = {
+						type: 'text',
+						payload: {
+							message: content
+						}
+					};
+					
+					ws.send(JSON.stringify(messageData));
+					
+					// Append own message immediately
+					appendMessage(content, 'current-user', true);
+					
+					messageInput.value = '';
+				});
+				
+				// Initialize WebSocket connection
+				connectWebSocket();
+				
+				// Initial scroll to bottom
+				scrollToBottom();
+			})();
+		</script>
+	</div>
+}
+
+templ MessagesList(messages []ChatMessage) {
+	for _, msg := range messages {
+		<div class={ "flex " + map[bool]string{true: "justify-end", false: "justify-start"}[msg.IsFromCurrentUser] }>
+			<div class={ "max-w-xs md:max-w-md lg:max-w-lg " + map[bool]string{true: "bg-blue-600 text-white", false: "bg-gray-200 text-gray-800"}[msg.IsFromCurrentUser] + " rounded-2xl px-4 py-2" }>
+				<p>{ msg.Content }</p>
+				<p class={ map[bool]string{true: "text-blue-200", false: "text-gray-500"}[msg.IsFromCurrentUser] + " text-xs mt-1 text-right" }>
+					{ msg.CreatedAt.Format("15:04") }
+				</p>
+			</div>
+		</div>
+	}
+}
+

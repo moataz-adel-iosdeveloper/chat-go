@@ -1,8 +1,8 @@
 package MessagesRepository
 
 import (
+	"chat-go/internal/config"
 	"chat-go/internal/models"
-	"chat-go/internal/services"
 	"context"
 	"errors"
 	"time"
@@ -14,7 +14,7 @@ import (
 
 // helper to get the messages collection at runtime. Returns an error if DB not initialized.
 func getMessagesCollection() (*mongo.Collection, error) {
-	col := services.GetMessagesCollection()
+	col := config.GetMessagesCollection()
 	if col == nil {
 		return nil, errors.New("database not initialized: call services.InitDB before using repositories")
 	}

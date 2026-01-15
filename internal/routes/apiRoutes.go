@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"chat-go/internal/config"
 	"chat-go/internal/middlewares"
 	"chat-go/internal/models"
 	"encoding/json"
@@ -10,10 +11,14 @@ import (
 )
 
 type Route struct {
+	Session config.Store
 }
 
 func NewRoutes() *Route {
-	return &Route{}
+	var store = config.NewCookieStore([]byte("super-secret-key"))
+	return &Route{
+		Session: store,
+	}
 }
 
 func (r *Route) APIRoutes(router *mux.Router) {
@@ -21,10 +26,6 @@ func (r *Route) APIRoutes(router *mux.Router) {
 	router.HandleFunc("/register", r.registerHandler).Methods("POST")
 	router.Handle("/allUsers", middlewares.
 		AuthMiddleware(http.HandlerFunc(r.allUserHandler))).Methods("GET")
-}
-
-func (r *Route) WebRoutes(router *mux.Router) {
-
 }
 
 func (r *Route) WriterResponse(w http.ResponseWriter, req *http.Request, response models.APIResponse, statusCode int) {

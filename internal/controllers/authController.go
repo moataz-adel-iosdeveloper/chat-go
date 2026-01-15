@@ -7,7 +7,7 @@ import (
 
 	"log"
 
-	"chat-go/internal/services"
+	"chat-go/internal/config"
 	"io"
 	"net/http"
 	"os"
@@ -42,13 +42,13 @@ func Login(req *http.Request) (response models.APIResponse, statusCode int) {
 	}
 
 	// check password
-	err = services.ComparePassword(user.Password, lr.Password, papperString)
+	err = config.ComparePassword(user.Password, lr.Password, papperString)
 	if err != nil {
 		return models.ErrorResponse("invalid email or password", nil), http.StatusUnauthorized
 	}
 
 	// create JWT token
-	token := services.GenerateToken(user.ID.Hex())
+	token := config.GenerateToken(user.ID.Hex())
 	if token == nil {
 		return models.ErrorResponse("failed to generate token", nil), http.StatusInternalServerError
 	}
@@ -112,7 +112,7 @@ func Register(req *http.Request) (response models.APIResponse, statusCode int) {
 	if papperString == "" {
 		return models.ErrorResponse("server misconfiguration", nil), http.StatusInternalServerError
 	}
-	hashedPassword, err := services.HashPassword(ur.Password, papperString)
+	hashedPassword, err := config.HashPassword(ur.Password, papperString)
 	if err != nil {
 		return models.ErrorResponse("failed to hash password", nil), http.StatusInternalServerError
 	}
@@ -120,7 +120,7 @@ func Register(req *http.Request) (response models.APIResponse, statusCode int) {
 	var id = primitive.NewObjectID()
 
 	// create token
-	token := services.GenerateToken(id.Hex())
+	token := config.GenerateToken(id.Hex())
 	if token == nil {
 		return models.ErrorResponse("failed to generate token", nil), http.StatusInternalServerError
 	}

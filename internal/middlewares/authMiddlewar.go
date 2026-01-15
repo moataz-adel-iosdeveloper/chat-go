@@ -1,12 +1,14 @@
 package middlewares
 
 import (
+	"chat-go/internal/config"
 	userRepository "chat-go/internal/repositories/user"
-	"chat-go/internal/services"
 	"context"
 	"log"
 	"net/http"
 	"strings"
+
+	"github.com/gorilla/mux"
 )
 
 func AuthMiddleware(next http.Handler) http.Handler {
@@ -27,7 +29,7 @@ func AuthMiddleware(next http.Handler) http.Handler {
 		// log.Printf("Auth token received: %s", token)
 
 		// Validate JWT signature and extract user_id claim
-		userID, err := services.ValidateToken(token)
+		userID, err := config.ValidateToken(token)
 		if err != nil {
 			log.Printf("Invalid JWT token: %v", err)
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
@@ -60,7 +62,7 @@ func AuthMiddlewareSocket(next http.Handler) http.Handler {
 			return
 		}
 		// Validate JWT signature and extract user_id claim
-		userID, err := services.ValidateToken(token)
+		userID, err := config.ValidateToken(token)
 		if err != nil {
 			log.Printf("Invalid JWT token: %v", err)
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
@@ -83,4 +85,19 @@ func AuthMiddlewareSocket(next http.Handler) http.Handler {
 		r = r.WithContext(ctx)
 		next.ServeHTTP(w, r)
 	})
+}
+
+func WebAuthMiddleware(store config.Store) mux.MiddlewareFunc {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			sess, _ := store.Get(r, "auth-session")
+
+			if sess.Values["user_id"] == nil {
+				http.Redirect(w, r, "/login", http.StatusSeeOther)
+				return
+			}
+
+			next.ServeHTTP(w, r)
+		})
+	}
 }

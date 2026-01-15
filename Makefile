@@ -10,9 +10,6 @@ GOCMD = go
 GOBUILD = $(GOCMD) build
 GORUN = $(GOCMD) run
 
-# Source directory
-SRC_DIR = ./cmd
-
 # Binary output
 BIN_DIR = ./bin
 BIN_FILE = $(BIN_DIR)/$(APP_NAME)
@@ -26,14 +23,14 @@ all: build
 # Run locally without building binary
 .PHONY: run
 run:
-	$(GORUN) $(SRC_DIR)/main.go
+	$(GORUN) main.go
 
 # -------------------------------
 # Build binary
 .PHONY: build
 build:
 	@mkdir -p $(BIN_DIR)
-	$(GOBUILD) -o $(BIN_FILE) $(SRC_DIR)/main.go
+	$(GOBUILD) -o $(BIN_FILE) /main.go
 	@echo "✅ Build complete: $(BIN_FILE)"
 
 # -------------------------------

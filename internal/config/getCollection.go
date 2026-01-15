@@ -1,4 +1,4 @@
-package services
+package config
 
 import (
 	"chat-go/internal/models"

@@ -1,0 +1,79 @@
+package front
+
+templ Register(isError bool, errorMessage string) {
+	<div id="auth-container" class="min-h-screen flex items-center justify-center bg-gray-100">
+		<div class="max-w-md w-full bg-white rounded-lg shadow-md p-8">
+			<h2 class="text-2xl font-bold text-center text-gray-800 mb-6">Create Account</h2>
+			
+			<form 
+				hx-post="/register" 
+				hx-target="#auth-container" 
+				hx-swap="innerHTML"
+				class="space-y-4"
+			>
+				<div>
+					<label for="username" class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+					<input 
+						type="text" 
+						id="username" 
+						name="username" 
+						required
+						placeholder="Enter your name"
+						class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+					/>
+				</div>
+				
+				<div>
+					<label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+					<input 
+						type="email" 
+						id="email" 
+						name="email" 
+						required
+						placeholder="Enter your email"
+						class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+					/>
+				</div>
+				
+				<div>
+					<label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+					<input 
+						type="password" 
+						id="password" 
+						name="password" 
+						required
+						placeholder="Create a password"
+						class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+					/>
+				</div>
+				
+				if isError {
+					<div class="p-3 bg-red-100 border border-red-400 text-red-700 rounded-md text-sm">
+						{ errorMessage }
+					</div>
+				}
+				
+				<button 
+					type="submit"
+					class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition font-medium"
+				>
+					Create Account
+				</button>
+			</form>
+			
+			<p class="mt-4 text-center text-gray-600">
+				Already have an account? 
+				<a 
+					href="#" 
+					hx-get="/login" 
+					hx-target="#auth-container" 
+					hx-swap="innerHTML"
+					class="text-blue-600 hover:text-blue-800 font-medium"
+				>
+					Sign in
+				</a>
+			</p>
+		</div>
+	</div>
+}
+
