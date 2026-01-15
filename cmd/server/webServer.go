@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -32,6 +33,7 @@ func NewWebServer(client *mongo.Client) *server {
 // Start runs the HTTP server for the API.
 func (webServer *server) Connect() error {
 	router := mux.NewRouter()
+
 	// global middlewares
 	router.Use(middlewares.LoggerMiddleware)
 
@@ -57,5 +59,8 @@ func (webServer *server) Connect() error {
 	routes.NewRoutes().SocketRoutes(wsRouter)
 
 	log.Printf("starting server at %s", webServer.Address)
-	return http.ListenAndServe(webServer.Address, router) // middlewares.EnableCORS(
+	headers := handlers.AllowedHeaders([]string{"Content-Type", "Authorization"})
+	methods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"})
+	origins := handlers.AllowedOrigins([]string{"*"})
+	return http.ListenAndServe(webServer.Address, handlers.CORS(headers, methods, origins)(router)) // middlewares.EnableCORS(
 }
