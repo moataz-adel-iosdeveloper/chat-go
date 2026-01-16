@@ -19,3 +19,12 @@ func (r *Route) allUserHandler(w http.ResponseWriter, req *http.Request) {
 	response, statusCode := controllers.GetAllUsers(req)
 	r.WriterResponse(w, req, response, statusCode)
 }
+
+func (r *Route) allConversationHandler(w http.ResponseWriter, req *http.Request) {
+	response, statusCode := controllers.GetAllConversations(req)
+	r.WriterResponse(w, req, response, statusCode)
+}
+func (r *Route) allMessagesHandler(w http.ResponseWriter, req *http.Request) {
+	response, statusCode := controllers.GetAllMessages(req)
+	r.WriterResponse(w, req, response, statusCode)
+}

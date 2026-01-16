@@ -1,7 +1,7 @@
 package routes
 
 import (
-	ChatControllers "chat-go/internal/controllers/chatController"
+	ChatControllers "chat-go/internal/controllers/chatControllers"
 	"chat-go/internal/middlewares"
 	"net/http"
 

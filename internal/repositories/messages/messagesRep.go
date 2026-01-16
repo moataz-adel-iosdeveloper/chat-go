@@ -66,7 +66,11 @@ func FindAllMessagesByConversationID(conversationID string) ([]*models.Message, 
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	filter := bson.M{"conversation_id": conversationID}
+	conversationobjID, err := primitive.ObjectIDFromHex(conversationID)
+	if err != nil {
+		return nil, err
+	}
+	filter := bson.M{"conversation_id": conversationobjID}
 	cursor, err := col.Find(ctx, filter)
 	if err != nil {
 		return nil, err

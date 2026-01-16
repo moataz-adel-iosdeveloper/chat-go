@@ -101,6 +101,41 @@ func FindConversationByTwoUserID(senderID string, reseverID string) (*models.Con
 	return conversations[0], nil
 }
 
+func FindConversationsByUserID(userID string) ([]*models.Conversation, error) {
+	col, err := getConversationsCollection()
+	if err != nil {
+		return nil, err
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	userObjID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		return nil, err
+	}
+	filter := bson.M{
+		"participant_ids": bson.M{
+			"$all": []primitive.ObjectID{userObjID},
+		},
+	}
+	cursor, err := col.Find(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+	var conversations []*models.Conversation
+	for cursor.Next(ctx) {
+		var conversation models.Conversation
+		if err := cursor.Decode(&conversation); err != nil {
+			return nil, err
+		}
+		conversations = append(conversations, &conversation)
+	}
+	if err := cursor.Err(); err != nil {
+		return nil, err
+	}
+	return conversations, nil
+}
+
 func UpdateConversation(conversation *models.Conversation) (*models.Conversation, error) {
 	col, err := getConversationsCollection()
 	if err != nil {

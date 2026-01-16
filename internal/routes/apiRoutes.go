@@ -24,8 +24,9 @@ func NewRoutes() *Route {
 func (r *Route) APIRoutes(router *mux.Router) {
 	router.HandleFunc("/login", r.loginHandler).Methods("POST")
 	router.HandleFunc("/register", r.registerHandler).Methods("POST")
-	router.Handle("/allUsers", middlewares.
-		AuthMiddleware(http.HandlerFunc(r.allUserHandler))).Methods("GET")
+	router.Handle("/all_users", middlewares.AuthMiddleware(http.HandlerFunc(r.allUserHandler))).Methods("GET")
+	router.Handle("/all_conversation", middlewares.AuthMiddleware(http.HandlerFunc(r.allConversationHandler))).Methods("Get")
+	router.Handle("/all_messages", middlewares.AuthMiddleware(http.HandlerFunc(r.allMessagesHandler))).Methods("Get")
 }
 
 func (r *Route) WriterResponse(w http.ResponseWriter, req *http.Request, response models.APIResponse, statusCode int) {

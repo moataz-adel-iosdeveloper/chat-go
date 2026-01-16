@@ -19,6 +19,7 @@ func init() {
 }
 
 func ChatHandler(w http.ResponseWriter, req *http.Request) {
+
 	// get another user id from query params
 	userID := req.URL.Query().Get("user_id")
 	if userID == "" {
