@@ -20,9 +20,11 @@ func init() {
 
 func ChatHandler(w http.ResponseWriter, req *http.Request) {
 
+	log.Println("Server started from ChatHandler")
 	// get another user id from query params
 	userID := req.URL.Query().Get("user_id")
 	if userID == "" {
+		log.Println("user_id query parameter is required")
 		http.Error(w, "user_id query parameter is required", http.StatusBadRequest)
 		return
 	}
@@ -30,11 +32,13 @@ func ChatHandler(w http.ResponseWriter, req *http.Request) {
 	// Get the authenticated user ID from context
 	authUserID := req.Context().Value("userID")
 	if authUserID == nil {
+		log.Println("Unauthorized")
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
 	if authUserID.(string) == userID {
+		log.Println("Cannot chat with yourself")
 		http.Error(w, "Cannot chat with yourself", http.StatusBadRequest)
 		return
 	}
@@ -53,11 +57,13 @@ func ChatHandler(w http.ResponseWriter, req *http.Request) {
 	if conversation == nil {
 		senderObjID, err := primitive.ObjectIDFromHex(authUserID.(string))
 		if err != nil {
+			log.Println("Error finding or Sender Id", err)
 			http.Error(w, "Error finding or Sender Id", http.StatusInternalServerError)
 			return
 		}
 		reseverObjID, err := primitive.ObjectIDFromHex(userID)
 		if err != nil {
+			log.Println("Error finding or Resever Id", err)
 			http.Error(w, "Error finding or Resever Id", http.StatusInternalServerError)
 			return
 		}
