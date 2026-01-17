@@ -43,6 +43,9 @@ func GetAllConversations(req *http.Request) (response models.APIResponse, status
 			UpdatedAt:      con.UpdatedAt.Time(),
 		})
 	}
+	if conversationResponse == nil {
+		conversationResponse = []models.ConversationResponse{}
+	}
 	return models.SuccessResponse("users retrieved successfully", conversationResponse), http.StatusOK
 }
 
