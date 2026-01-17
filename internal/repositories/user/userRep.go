@@ -88,7 +88,7 @@ func FindUserByID(id string) (*models.User, error) {
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	var user *models.User
+	var user models.User
 	objID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, err
@@ -97,7 +97,7 @@ func FindUserByID(id string) (*models.User, error) {
 	if err != nil {
 		return nil, err
 	}
-	return user, nil
+	return &user, nil
 }
 
 func GetAllUsers() ([]*models.User, error) {

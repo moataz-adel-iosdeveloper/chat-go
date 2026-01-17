@@ -5,6 +5,7 @@ import (
 	"chat-go/internal/models"
 	"context"
 	"errors"
+	"log"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -134,6 +135,36 @@ func FindConversationsByUserID(userID string) ([]*models.Conversation, error) {
 		return nil, err
 	}
 	return conversations, nil
+}
+
+func FindOrCreateConversationsByTwoUsersID(userID string, authUserID string) (*models.Conversation, error) {
+	conversion, err := FindConversationByTwoUserID(authUserID, userID)
+	if err != nil {
+		return nil, err
+	}
+	if conversion == nil {
+		senderObjID, err := primitive.ObjectIDFromHex(authUserID)
+		if err != nil {
+			log.Println("Error finding or Sender Id", err)
+			return nil, err
+		}
+		reseverObjID, err := primitive.ObjectIDFromHex(userID)
+		if err != nil {
+			log.Println("Error finding or Resever Id", err)
+			return nil, err
+		}
+		newConversation := &models.Conversation{
+			ParticipantIDs: []primitive.ObjectID{senderObjID, reseverObjID},
+			CreatedAt:      primitive.NewDateTimeFromTime(time.Now()),
+			UpdatedAt:      primitive.NewDateTimeFromTime(time.Now()),
+		}
+		conversion, err = CreateConversation(newConversation)
+		if err != nil {
+			log.Println("Error creating conversation:", err)
+			return nil, err
+		}
+	}
+	return conversion, nil
 }
 
 func UpdateConversation(conversation *models.Conversation) (*models.Conversation, error) {

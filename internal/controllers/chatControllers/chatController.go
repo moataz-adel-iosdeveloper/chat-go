@@ -6,9 +6,6 @@ import (
 	conversationsRepository "chat-go/internal/repositories/conversations"
 	"log"
 	"net/http"
-	"time"
-
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 var chatManager *ChatManager
@@ -22,13 +19,12 @@ func ChatHandler(w http.ResponseWriter, req *http.Request) {
 
 	log.Println("Server started from ChatHandler")
 	// get another user id from query params
-	userID := req.URL.Query().Get("user_id")
-	if userID == "" {
+	conversationID := req.URL.Query().Get("conversation_id")
+	if conversationID == "" {
 		log.Println("user_id query parameter is required")
-		http.Error(w, "user_id query parameter is required", http.StatusBadRequest)
+		http.Error(w, "conversationID query parameter is required", http.StatusBadRequest)
 		return
 	}
-
 	// Get the authenticated user ID from context
 	authUserID := req.Context().Value("userID")
 	if authUserID == nil {
@@ -37,47 +33,12 @@ func ChatHandler(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if authUserID.(string) == userID {
-		log.Println("Cannot chat with yourself")
-		http.Error(w, "Cannot chat with yourself", http.StatusBadRequest)
-		return
-	}
-
-	log.Printf("Authenticated user ID: %v, Chatting with user ID: %s", authUserID, userID)
-
-	// Find a conversation between the two users
-	conversation, err := conversationsRepository.FindConversationByTwoUserID(authUserID.(string), userID)
+	// Find a conversation between the two users by ID
+	conversation, err := conversationsRepository.FindConversationByID(conversationID)
 	if err != nil {
 		log.Println("Error finding conversation:", err)
 		http.Error(w, "Error finding conversation", http.StatusInternalServerError)
 		return
-	}
-
-	// create a conversation between the two users
-	if conversation == nil {
-		senderObjID, err := primitive.ObjectIDFromHex(authUserID.(string))
-		if err != nil {
-			log.Println("Error finding or Sender Id", err)
-			http.Error(w, "Error finding or Sender Id", http.StatusInternalServerError)
-			return
-		}
-		reseverObjID, err := primitive.ObjectIDFromHex(userID)
-		if err != nil {
-			log.Println("Error finding or Resever Id", err)
-			http.Error(w, "Error finding or Resever Id", http.StatusInternalServerError)
-			return
-		}
-		newConversation := &models.Conversation{
-			ParticipantIDs: []primitive.ObjectID{senderObjID, reseverObjID},
-			CreatedAt:      primitive.NewDateTimeFromTime(time.Now()),
-			UpdatedAt:      primitive.NewDateTimeFromTime(time.Now()),
-		}
-		conversation, err = conversationsRepository.CreateConversation(newConversation)
-		if err != nil {
-			log.Println("Error creating conversation:", err)
-			http.Error(w, "Error creating conversation", http.StatusInternalServerError)
-			return
-		}
 	}
 
 	connectionHandler(conversation, authUserID.(string), w, req)

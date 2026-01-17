@@ -17,3 +17,10 @@ type MessagePayload struct {
 	Content        string `json:"content"`
 	ContentType    string `json:"content_type"`
 }
+
+type AllMessagesResponce struct {
+	Messages     []*Message    `json:"messages"`
+	User         *User         `json:"your_user"`
+	OtherUser    *User         `json:"other_user"`
+	Conversation *Conversation `json:"conversation"`
+}
